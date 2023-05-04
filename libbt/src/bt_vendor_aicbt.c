@@ -132,7 +132,9 @@ static int init(const bt_vendor_callbacks_t* p_cb, unsigned char *local_bdaddr)
 #if (AICBT_A2DP_OFFLOAD == TRUE)
     aicbt_vnd_a2dp_init(bt_vendor_cbacks);
 #endif
-    inotify_pthread_init();
+    //if want to send apcf command when support platform,
+    //use inotify_pthread_init and inotify_pthread_deinit
+    //inotify_pthread_init();
 
     return 0;
 }
@@ -260,8 +262,9 @@ static int op(bt_vendor_opcode_t opcode, void *param)
 static void cleanup( void )
 {
     BTVNDDBG("cleanup");
-
-    inotify_pthread_deinit();
+    //if want to send apcf command when support platform,
+    //use inotify_pthread_init and inotify_pthread_deinit
+    //inotify_pthread_deinit();
     upio_cleanup();
 
     bt_vendor_cbacks = NULL;

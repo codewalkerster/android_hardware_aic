@@ -154,7 +154,7 @@ static int init_rfkill()
     char path[64];
     char buf[16];
     int fd, sz, id;
-    const char *basepath = "/sys/devices/platform/aic-bsp/rfkill";
+    const char *basepath = "/sys/devices/platform/aic-bt/rfkill";
 
     DIR *d;
     struct dirent *de;

@@ -1617,6 +1617,15 @@ uint8_t hw_lpm_set_sleep_enable(uint8_t turn_on)
     HC_BT_HDR  *p_buf = NULL;
     uint8_t     *p;
     uint8_t     ret = FALSE;
+    if (turn_on) {
+        upio_set(UPIO_LPM_MODE, UPIO_ASSERT, 0);
+    } else {
+        upio_set(UPIO_LPM_MODE, UPIO_DEASSERT, 0);
+    }
+    if (bt_vendor_cbacks) {
+        bt_vendor_cbacks->lpm_cb(BT_VND_OP_RESULT_SUCCESS);
+    }
+    return 0;
     ///hw_lm_direct_return(turn_on);
     ///return true;
     if (bt_vendor_cbacks)
@@ -1696,6 +1705,11 @@ uint32_t hw_lpm_get_idle_timeout(void)
 void hw_lpm_set_wake_state(uint8_t wake_assert)
 {
     uint8_t state = (wake_assert) ? UPIO_ASSERT : UPIO_DEASSERT;
+    if(hw_cfg_cb.state != 0)
+    {
+        upio_set(UPIO_LPM_MODE, UPIO_ASSERT, 0);
+        wake_assert = UPIO_ASSERT;
+    }
     ALOGE("set_wake_stat %x\n",wake_assert);
     upio_set(UPIO_BT_WAKE, state, lpm_param.bt_wake_polarity);
 }

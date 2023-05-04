@@ -13,7 +13,12 @@ else
 endif
 
 TARGET_CHIP_AICBT := aic8800
+HAVE_SYSTEM_BT := $(shell test -d $(TOPDIR)system/bt/ && echo true)
+ifeq ($(HAVE_SYSTEM_BT),true)
 BDROID_DIR := $(TOP_DIR)system/bt
+else
+BDROID_DIR := $(TOP_DIR)packages/modules/Bluetooth/system/
+endif
 
 ifeq ($(strip $(USE_BLUETOOTH_AIC8800)),true)
 LOCAL_CFLAGS += -DUSE_BLUETOOTH_AIC8800
@@ -54,7 +59,7 @@ LOCAL_SHARED_LIBRARIES := \
         libcutils \
         liblog
 
-LOCAL_MODULE := libbt-vendor
+LOCAL_MODULE := libbt-vendor-aic
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_MODULE_OWNER := aic
