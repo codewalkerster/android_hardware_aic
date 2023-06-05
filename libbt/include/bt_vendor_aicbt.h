@@ -56,16 +56,16 @@
 
 /* Device port name where Bluetooth controller attached */
 #ifndef BLUETOOTH_UART_DEVICE_PORT
-#define BLUETOOTH_UART_DEVICE_PORT      "/dev/ttyO1"    /* maguro */
+#define BLUETOOTH_UART_DEVICE_PORT      "/dev/ttyS0"    /* maguro */
 #endif
 
 /* Location of firmware patch files */
 #ifndef FW_PATCHFILE_LOCATION
-#define FW_PATCHFILE_LOCATION "/vendor/firmware/"  /* maguro */
+#define FW_PATCHFILE_LOCATION "/vendor/etc/firmware/"  /* maguro */
 #endif
 
 #ifndef UART_TARGET_BAUD_RATE
-#define UART_TARGET_BAUD_RATE           3000000
+#define UART_TARGET_BAUD_RATE           1500000
 #endif
 
 /* The millisecond delay pauses on HCI transport after firmware patches

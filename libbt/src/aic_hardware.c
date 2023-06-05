@@ -994,6 +994,7 @@ void hw_config_cback(void *p_mem)
 #if (USE_CONTROLLER_BDADDR == TRUE)
     const uint8_t null_bdaddr[BD_ADDR_LEN] = {0,0,0,0,0,0};
 #endif
+    bool config_success = false;
 
     status = *((uint8_t *)(p_evt_buf + 1) + HCI_EVT_CMD_CMPL_STATUS_RET_BYTE);
     p = (uint8_t *)(p_evt_buf + 1) + HCI_EVT_CMD_CMPL_OPCODE;
@@ -1246,10 +1247,7 @@ void hw_config_cback(void *p_mem)
                     is_proceeding = hw_aic_bt_pta_en(p_buf);
                     break;
                 }
-            case HW_CFG_UPDATE_CONFIG_INFO:
-                is_proceeding = hw_aic_bt_wr_aon_params(p_buf);
-                if (is_proceeding == true)
-                    break;
+               break;
             case HW_CFG_WR_AON_PARAM:
                 is_proceeding = hw_aic_bt_set_lp_level(p_buf);
                 if (is_proceeding == true)
@@ -1265,17 +1263,18 @@ void hw_config_cback(void *p_mem)
                     break;
             case HW_CFG_SET_CPU_POWR_OFF_EN:
                 aicbt_sleep_state = AICBT_SLEEP_STATE_CONFIG_DONE;
-                ALOGI("vendor lib fwcfg completed");
-                bt_vendor_cbacks->dealloc(p_buf);
-                bt_vendor_cbacks->fwcfg_cb(BT_VND_OP_RESULT_SUCCESS);
-                hw_cfg_cb.state = 0;
-
-                if (hw_cfg_cb.fw_fd != -1) {
-                   close(hw_cfg_cb.fw_fd);
-                   hw_cfg_cb.fw_fd = -1;
-                }
-                is_proceeding = TRUE;
+                is_proceeding = hw_aic_bt_pta_en(p_buf);
                 break;
+            case HW_CFG_UPDATE_CONFIG_INFO:
+                is_proceeding = TRUE;
+                config_success = true;
+                break;
+#if 0
+            case HW_CFG_SET_FW_RET_PARAM:
+                is_proceeding = TRUE;
+                config_success = true;
+                break;
+#endif
 #if (USE_CONTROLLER_BDADDR == TRUE)
             case HW_CFG_READ_BD_ADDR:
                 p_tmp = (char *) (p_evt_buf + 1) + \
@@ -1312,8 +1311,17 @@ void hw_config_cback(void *p_mem)
     /* Free the RX event buffer */
     if (bt_vendor_cbacks)
         bt_vendor_cbacks->dealloc(p_evt_buf);
+    if(config_success) {
+        ALOGI("vendor lib fwcfg completed");
+        bt_vendor_cbacks->dealloc(p_buf);
+        bt_vendor_cbacks->fwcfg_cb(BT_VND_OP_RESULT_SUCCESS);
+        hw_cfg_cb.state = 0;
 
-    if (is_proceeding == FALSE) {
+        if (hw_cfg_cb.fw_fd != -1) {
+           close(hw_cfg_cb.fw_fd);
+           hw_cfg_cb.fw_fd = -1;
+        }
+    } else if (is_proceeding == FALSE) {
         ALOGE("vendor lib fwcfg aborted!!!");
         if (bt_vendor_cbacks) {
             if (p_buf != NULL)

@@ -1,5 +1,6 @@
 #
 # Copyright (C) 2008 The Android Open Source Project
+# Copyright (C) 2023 Rockchip Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +18,15 @@
 ########################
 -include hardware/aic/wlan/config/config.mk
 
+AICS_SUBDIRS := $(wildcard hardware/aic/firmware/aicsdio/*/)
+
+AICS_DEST_DIRS := $(TARGET_COPY_OUT_VENDOR)/etc/firmware/aicsdio
+
 PRODUCT_COPY_FILES += \
-    $(call find-copy-subdir-files,"fmacfw*.bin",hardware/aic/wlan/firmware/aic8800,$(TARGET_COPY_OUT_VENDOR)/etc/firmware)
+	$(foreach DIR, $(AICS_SUBDIRS), \
+		$(foreach file, $(notdir $(shell ls $(DIR)/*.bin $(DIR)/*.txt)), \
+			$(DIR)/$(file):$(AICS_DEST_DIRS)/$(file) \
+		) \
+	)
+
 ########################

@@ -46,7 +46,7 @@
 ******************************************************************************/
 
 #ifndef UPIO_DBG
-#define UPIO_DBG FALSE
+#define UPIO_DBG TRUE
 #endif
 
 #if (UPIO_DBG == TRUE)
@@ -151,6 +151,44 @@ static int is_rfkill_disabled(void)
 
 static int init_rfkill()
 {
+
+#if 1//For RK
+    char path[64];
+    char buf[16];
+    int fd, sz, id;
+    int rfkill_id;
+
+    if (is_rfkill_disabled())
+        return -1;
+
+    for (id = 0; ; id++)
+    {
+        snprintf(path, sizeof(path), "/sys/class/rfkill/rfkill%d/type", id);
+        fd = open(path, O_RDONLY);
+        if (fd < 0)
+        {
+            ALOGE("init_rfkill : open(%s) failed: %s (%d)\n", \
+                 path, strerror(errno), errno);
+            return -1;
+        }
+
+        sz = read(fd, &buf, sizeof(buf));
+        close(fd);
+
+        if (sz >= 9 && memcmp(buf, "bluetooth", 9) == 0)
+        {
+            rfkill_id = id;
+            break;
+        }
+    }
+
+    asprintf(&rfkill_state_path, "/sys/class/rfkill/rfkill%d/state", rfkill_id);
+    return 0;
+
+
+#endif
+
+#if 0
     char path[64];
     char buf[16];
     int fd, sz, id;
@@ -184,6 +222,7 @@ static int init_rfkill()
 fail:
     ALOGE("%s: No rfkill control node found", __func__);
     return -1;
+#endif
 }
 
 /*****************************************************************************
@@ -452,7 +491,7 @@ void upio_set(uint8_t pio, uint8_t action, uint8_t polarity)
                      * a 10sec internal in-activity timeout timer before it
                      * attempts to deassert BT_WAKE line.
                      */
-                    return;
+               	return;
 #else
                 return;
 #endif
@@ -489,7 +528,7 @@ void upio_set(uint8_t pio, uint8_t action, uint8_t polarity)
             else
 #endif
                 buffer = '1';
-
+			ALOGE("%s upio_set to %c", __func__, buffer);
             if (write(fd, &buffer, 1) < 0) {
                 ALOGE("upio_set : write(%s) failed: %s (%d)",
                         VENDOR_BTWRITE_PROC_NODE, strerror(errno),errno);

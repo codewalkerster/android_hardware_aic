@@ -243,12 +243,17 @@ int userial_vendor_open(tUSERIAL_CFG *p_cfg)
         ALOGE("userial vendor open: unable to open %s", vnd_userial.port_name);
         return -1;
     }
+	
 
     tcflush(vnd_userial.fd, TCIOFLUSH);
 
     tcgetattr(vnd_userial.fd, &vnd_userial.termios);
     cfmakeraw(&vnd_userial.termios);
     vnd_userial.termios.c_cflag |= (CRTSCTS | stop_bits);
+    //vnd_userial.termios.c_cflag |= stop_bits;
+    //vnd_userial.termios.c_cflag &= ~CRTSCTS;
+
+
     tcsetattr(vnd_userial.fd, TCSANOW, &vnd_userial.termios);
     tcflush(vnd_userial.fd, TCIOFLUSH);
 
@@ -268,6 +273,7 @@ int userial_vendor_open(tUSERIAL_CFG *p_cfg)
     ALOGI("device fd = %d open", vnd_userial.fd);
 
     return vnd_userial.fd;
+
 }
 
 /*******************************************************************************
